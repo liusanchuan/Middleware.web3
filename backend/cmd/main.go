@@ -1,13 +1,24 @@
 package main
 
 import (
-	"net/http"
-
+	"backend/cmd/db"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+
+	"net/http"
 )
+
+func init() {
+	db.InitCollection()
+}
 
 func main() {
 	r := gin.Default()
+	corsCfg := cors.DefaultConfig()
+	corsCfg.AllowAllOrigins = true
+	corsCfg.AddAllowHeaders("Authorization")
+	r.Use(cors.New(corsCfg))
+
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "pong",
