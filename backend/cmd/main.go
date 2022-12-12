@@ -2,6 +2,7 @@ package main
 
 import (
 	"backend/cmd/db"
+	"backend/cmd/handler"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
@@ -18,6 +19,8 @@ func main() {
 	corsCfg.AllowAllOrigins = true
 	corsCfg.AddAllowHeaders("Authorization")
 	r.Use(cors.New(corsCfg))
+
+	r.POST("/v1/user/auth", handler.MetamaskLoginAPI)
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
