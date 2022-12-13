@@ -42,17 +42,17 @@ func MetamaskLoginAPI(c *gin.Context) {
 		return
 	}
 	//db.Where("public_address = ?", params.PublicAddress).Limit(1).Find(&user)
-
-	if user.Id.Hex() > 0 {
-		if user.Nonce != params.Nonce {
-			c.JSON(http.StatusUnauthorized, "login failed")
-			return
-		}
+	cnt, _ := MongoUserCollection.CountDocuments(context.TODO(), bson.M{"public_address": params.PublicAddress})
+	if cnt >= 0 {
+		//if user.Nonce != params.Nonce {
+		//	c.JSON(http.StatusUnauthorized, "login failed")
+		//	return
+		//}
 
 		user.Nonce = utils.RandStringRunes(6)
-		db.Save(&user)
-
-		c.JSON(http.StatusOK, MetamaskLoginResponseData{
+		//TODO
+		//MongoUserCollection.UpdateOne()
+		c.JSON(http.StatusOK, models.MetamaskLoginResponseData{
 			AccessToken: utils.GenerateToken(utils.CustomClaims{
 				PublicAddress: user.PublicAddress,
 				RegisteredClaims: jwt.RegisteredClaims{
@@ -65,16 +65,15 @@ func MetamaskLoginAPI(c *gin.Context) {
 	}
 
 	newUser := models.User{PublicAddress: params.PublicAddress, Nonce: utils.RandStringRunes(8)}
-	err = db.Create(&newUser).Error
-
+	res, err := MongoUserCollection.InsertOne(context.TODO(), newUser)
+	fmt.Println(res)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, "login failed")
 		return
 	}
 
-	c.JSON(http.StatusOK, MetamaskLoginResponseData{
+	c.JSON(http.StatusOK, models.MetamaskLoginResponseData{
 		AccessToken: utils.GenerateToken(utils.CustomClaims{
-			Uid:           newUser.ID,
 			PublicAddress: user.PublicAddress,
 		}),
 	})

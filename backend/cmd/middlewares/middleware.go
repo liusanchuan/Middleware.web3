@@ -52,7 +52,6 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		c.Set("uid", claims.Uid)
 		c.Set("publicAddress", claims.PublicAddress)
 	}
 }

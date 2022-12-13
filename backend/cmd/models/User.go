@@ -13,3 +13,7 @@ type MetamaskLoginParameter struct {
 	Signature     string `json:"signature"`
 	Nonce         string `json:"nonce"`
 }
+
+type MetamaskLoginResponseData struct {
+	AccessToken string `json:"accessToken"`
+}
