@@ -78,3 +78,30 @@ func MetamaskLoginAPI(c *gin.Context) {
 		}),
 	})
 }
+
+func GetLoginNonceAPI(c *gin.Context) {
+	publicAddress, _ := c.GetQuery("publicAddress")
+
+	if publicAddress == "" || !utils.IsAddressValid(publicAddress) {
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	var user models.User
+	MongoUserCollection := db.Client.Database(DatabaseName).Collection(UserCollection)
+	err := MongoUserCollection.FindOne(context.TODO(), bson.M{"public_address": publicAddress}).Decode(&user)
+	// user not in database
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
+	if user.Nonce != "" {
+		c.JSON(http.StatusOK, gin.H{
+			"nonce": user.Nonce,
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"nonce": utils.RandStringRunes(6),
+	})
+}

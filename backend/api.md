@@ -61,4 +61,12 @@ todo
 }
 ```
 
+```
+
+contract_address topic1 topic2 topic3 topic4 data tx_hash block_hash block_number block_time index tx_index
+
+```
+
+
+
 6. 资产跨链管理表

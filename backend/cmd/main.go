@@ -20,6 +20,7 @@ func main() {
 	corsCfg.AddAllowHeaders("Authorization")
 	r.Use(cors.New(corsCfg))
 
+	r.GET("/v1/user/nonce", handler.GetLoginNonceAPI)
 	r.POST("/v1/user/auth", handler.MetamaskLoginAPI)
 
 	r.GET("/ping", func(c *gin.Context) {
