@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-interface ERC721Cross is IERC721 {
+interface IERC721Cross is IERC721 {
     // Emitted when `id` token is sync minted from `from` to `to`.
     event SyncMinted(address from, address to, uint256 id);
     // Emitted when `id` token is transfered by cross-chain from `from` to `to` on `receiveChainID` chain.
@@ -24,6 +24,7 @@ interface ERC721Cross is IERC721 {
         uint256 senderChainID
     );
 
+    // SyncMint An NFT with `id` to address `to` and an `evidence` signed by owner's proxy
     function syncMint(
         address to,
         uint256 id,
@@ -31,6 +32,8 @@ interface ERC721Cross is IERC721 {
         bytes memory evidence
     ) external;
 
+
+    // CrossTransfer An NFT with `id` to address `to` on `receiveChainID` chain and an `evidence` signed by owner's proxy
     function crossTransfer(
         address to,
         uint256 id,
@@ -39,6 +42,7 @@ interface ERC721Cross is IERC721 {
         bytes memory evidence
     ) external;
 
+    // CrossReceive An NFT with `id` from address `from` on `receiveChainID` chain and an `evidence` signed by owner's proxy
     function crossReceive(
         address from,
         uint256 id,
@@ -48,14 +52,18 @@ interface ERC721Cross is IERC721 {
     ) external;
 }
 
-contract OmniOneNFT is ERC721Cross, ERC721, Ownable {
+contract ERC721Cross is IERC721Cross, ERC721, Ownable {
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenCounter;
     address public proxyOwner;
     mapping(bytes32 => bool) usedEvidence;
 
-    constructor(address _proxyOwner) ERC721("OmniOneNFT", "OONFT") {
+    constructor(
+        string memory tokenName,
+        string memory tokenSymbel,
+        address _proxyOwner
+    ) ERC721(tokenName, tokenSymbel) {
         proxyOwner = _proxyOwner;
     }
 
@@ -175,4 +183,10 @@ contract OmniOneNFT is ERC721Cross, ERC721, Ownable {
 
         // implicitly return (r, s, v)
     }
+}
+
+contract OmniOneNFT is ERC721Cross {
+    constructor(address _proxyOwner)
+        ERC721Cross("OmniOneNFT", "OONFT", _proxyOwner)
+    {}
 }
