@@ -1,0 +1,12 @@
+{
+  "name": "hardhat-project",
+  "devDependencies": {
+    "@nomiclabs/hardhat-waffle": "^2.0.3",
+    "hardhat": "^2.9.6"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.6.0",
+    "base64-js": "^1.5.1",
+    "eth-ens-namehash": "^2.0.8"
+  }
+}
