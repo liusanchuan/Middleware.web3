@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 interface ERC721Cross is IERC721 {
+    
     // Emitted when `id` token is sync minted from `from` to `to`.
     event SyncMinted(address from, address to, uint256 id);
     // Emitted when `id` token is transfered by cross-chain from `from` to `to` on `receiveChainID` chain.
@@ -27,6 +28,7 @@ interface ERC721Cross is IERC721 {
     function syncMint(
         address to,
         uint256 id,
+        bytes32 random,
         bytes memory evidence
     ) external;
 
@@ -34,6 +36,7 @@ interface ERC721Cross is IERC721 {
         address to,
         uint256 id,
         uint256 receiveChainID,
+        bytes32 random,
         bytes memory evidence
     ) external;
 
@@ -41,14 +44,16 @@ interface ERC721Cross is IERC721 {
         address from,
         uint256 id,
         uint256 senderChainID,
+        bytes32 random,
         bytes memory evidence
     ) external;
+
 }
 
 contract OmniOneNFT is ERC721Cross, ERC721, Ownable {
     using Counters for Counters.Counter;
 
-    Counters.Counter private _tokenIdCounter;
+    Counters.Counter private _tokenCounter;
     address public proxyOwner;
 
     constructor(address _proxyOwner) ERC721("OmniOneNFT", "OONFT") {
@@ -58,18 +63,18 @@ contract OmniOneNFT is ERC721Cross, ERC721, Ownable {
     function syncMint(
         address to,
         uint256 id,
+        bytes32 random,
         bytes memory evidence
     ) external override {
-        bytes32 msgHash = keccak256(abi.encodePacked(msg.sender, to, id));
+        bytes32 msgHash = keccak256(abi.encodePacked(msg.sender, to, id,random));
         // Check ECDSA signature
         require(
             recoverSigner(msgHash, evidence) == proxyOwner,
             "ERR: Your evidence not valid!"
         );
         
-        uint256 tokenId = _tokenIdCounter.current();
-        _tokenIdCounter.increment();
-        _safeMint(to, tokenId);
+        _tokenCounter.increment();
+        _safeMint(to, id);
 
         emit SyncMinted(msg.sender, to, id);
     }
@@ -78,6 +83,7 @@ contract OmniOneNFT is ERC721Cross, ERC721, Ownable {
         address to,
         uint256 id,
         uint256 receiveChainID,
+        bytes32 random,
         bytes memory evidence
     ) external override {}
 
@@ -85,14 +91,11 @@ contract OmniOneNFT is ERC721Cross, ERC721, Ownable {
         address from,
         uint256 id,
         uint256 senderChainID,
+        bytes32 random,
         bytes memory evidence
     ) external override {}
 
-    function safeMint(address to) public onlyOwner {
-        uint256 tokenId = _tokenIdCounter.current();
-        _tokenIdCounter.increment();
-        _safeMint(to, tokenId);
-    }
+
 
     function recoverSigner(bytes32 msgHash, bytes memory sign)
         public
