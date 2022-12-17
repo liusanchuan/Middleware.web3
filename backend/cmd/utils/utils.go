@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"crypto/ecdsa"
 	"encoding/hex"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
@@ -15,14 +16,12 @@ import (
 
 var letterRunes = []rune("1234567890abcdefghijklmnopqrstuvwxyz")
 var seededRand = rand.New(rand.NewSource(time.Now().UnixNano()))
-var letterBytes = []byte("1234567890abcdef")
 
-func RandBytes(n int) string {
-	b := make([]byte, n)
-	for i := range b {
-		b[i] = letterBytes[seededRand.Intn(len(letterBytes))]
-	}
-	return string(b)
+func RandBytes(n int) []byte {
+	token := make([]byte, n)
+	rand.Read(token)
+	fmt.Println(token)
+	return token
 }
 
 func RandStringRunes(n int) string {
@@ -131,7 +130,13 @@ func HashApplyCrossReceive(addr1, addr2, id, senderChainId, random string) strin
 }
 
 func SigMessage(dataToSign, hexPrivateKey string) string {
-	//hexPrivateKey := "0xae78c8b502571dba876742437f8bc78b689cf8518356c0921393d89caaf284ce"
+
+	// !! this private key is for test only
+	// do not use in Product env
+	//Public Key: 0x0408476593202ad2182e3c01624de2770f70a987b834634986632b442530d6634be835697ef8caae26af4f2c7b95f5b9ce96b4120df1f6a6b562922cee314f9bf7
+	//Address: 0xa36461eD0cd2d34c20C63cB52Dc3190Aa3b57529
+
+	hexPrivateKey = "0x21b565205d29ff8e3c0c50a0664911b137dd2b476987cbe370e9ab70a1f4a4c6"
 	//dataToSign := "bou"
 
 	privateKey, err := crypto.HexToECDSA(hexPrivateKey[2:])
@@ -152,4 +157,26 @@ func SigMessage(dataToSign, hexPrivateKey string) string {
 
 	fmt.Println(signature) // 0xc83d417a3b99535e784a72af0d9772c019c776aa0dfe4313c001a5548f6cf254477f5334c30da59531bb521278edc98f1959009253dda4ee9f63fe5562ead5aa00
 	return signature
+}
+
+func GenerateKey() {
+	privateKey, err := crypto.GenerateKey()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	privateKeyBytes := crypto.FromECDSA(privateKey)
+	fmt.Println("SAVE BUT DO NOT SHARE THIS (Private Key):", hexutil.Encode(privateKeyBytes))
+
+	publicKey := privateKey.Public()
+	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
+	if !ok {
+		log.Fatal("cannot assert type: publicKey is not of type *ecdsa.PublicKey")
+	}
+
+	publicKeyBytes := crypto.FromECDSAPub(publicKeyECDSA)
+	fmt.Println("Public Key:", hexutil.Encode(publicKeyBytes))
+
+	address := crypto.PubkeyToAddress(*publicKeyECDSA).Hex()
+	fmt.Println("Address:", address)
 }

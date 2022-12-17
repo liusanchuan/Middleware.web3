@@ -33,5 +33,14 @@ func main() {
 			"message": "pong",
 		})
 	})
+	//randomStr := "0x" + hex.EncodeToString([]byte{
+	//	38, 169, 229, 89, 164, 1, 181, 53,
+	//	73, 218, 175, 232, 133, 246, 195, 247,
+	//	90, 62, 195, 54, 14, 19, 235, 196,
+	//	38, 245, 57, 139, 66, 2, 100, 27,
+	//})
+	//fmt.Println(randomStr)
+	//res := utils.HashApplySyncMint("0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "0", randomStr)
+	//fmt.Println(res)
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
