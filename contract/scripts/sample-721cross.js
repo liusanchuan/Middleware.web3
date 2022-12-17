@@ -107,6 +107,21 @@ async function main() {
 			console.log(`Event ${event.event} with args ${event.args}`);
 		}
 	}
+
+	// ===== get logs ==== //
+
+	const logs = await hre.ethers.provider.getLogs({
+		address:ooNFT.address,
+		fromBlock:0,
+        toBlock: 'latest'
+	})
+
+	// parse event by ooNFT
+	for (const log of logs) {
+		const result = ooNFT.interface.parseLog(log)
+		console.log(result)
+	}
+
 	return
 }
 
