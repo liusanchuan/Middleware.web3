@@ -70,3 +70,74 @@ contract_address topic1 topic2 topic3 topic4 data tx_hash block_hash block_numbe
 
 
 6. 资产跨链管理表
+
+
+
+api
+
+1. POST   /v1/signature/syncMint   
+
+input
+```
+{
+    "address_1":"0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+    "address_2":"0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+    "id":0
+
+
+}
+```
+output
+```
+{
+    "id": 0,
+    "random": "0x26a9e559a401b53549daafe885f6c3f75a3ec3360e13ebc426f5398b4202641b",
+    "sig": "0xa987dd66703501ff940bcdf69ec7a4ffda32ea3dca25aec0a1e4d5ba3597780d3d82a59c67315f5bfa473adef1fc252a9500122850cb3cb6c1c12537166d48e301"
+}
+
+```
+
+
+2. POST   /v1/signature/crossTransfer
+
+input
+```
+{
+      "sender":"0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "receiver":"0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "id":1,
+     "receiveChainId":5
+
+}
+```
+output
+```
+{
+    "id": 1,
+    "random": "Uv38ByGCZU8WP18PmmIdcpVmx00QA3xNe7sEB9Hixkk=",
+    "sig": "0x176d06e1b093d58e6ef7c791f558ee321215e5ce0164e9f34c07e5941eb0565f41da28ddadd5e04486d843996f26e9c84428de17ba4dbdde65c1d00b6d17c63100"
+}
+```
+
+3. POST   /v1/signature/crossTransfer
+
+input
+```
+{
+      "sender":"0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "receiver":"0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "id":1,
+     "senderChainId":5
+
+}
+```
+output
+```
+{
+    "id": 1,
+    "random": "Uv38ByGCZU8WP18PmmIdcpVmx00QA3xNe7sEB9Hixkk=",
+    "sig": "0x176d06e1b093d58e6ef7c791f558ee321215e5ce0164e9f34c07e5941eb0565f41da28ddadd5e04486d843996f26e9c84428de17ba4dbdde65c1d00b6d17c63100"
+}
+```
+
+
