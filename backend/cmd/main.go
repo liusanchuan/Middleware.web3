@@ -22,6 +22,11 @@ func main() {
 
 	r.GET("/v1/user/nonce", handler.GetLoginNonceAPI)
 	r.POST("/v1/user/auth", handler.MetamaskLoginAPI)
+	r.GET("v1/getNFTs", handler.GetNFTS)
+	r.POST("v1/signature/syncMint", handler.GetSignatureSyncMint)
+	r.POST("v1/signature/crossTransfer", handler.GetSignatureCrossTransfer)
+	r.POST("v1/signature/crossReceive", handler.GetSignatureCrossReceive)
+	//r.POST("")
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
