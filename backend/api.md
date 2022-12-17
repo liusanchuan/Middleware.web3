@@ -119,7 +119,7 @@ output
 }
 ```
 
-3. POST   /v1/signature/crossTransfer
+3. POST   /v1/signature/crossReceive
 
 input
 ```
