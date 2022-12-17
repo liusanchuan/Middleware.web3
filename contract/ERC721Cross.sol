@@ -7,7 +7,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 interface ERC721Cross is IERC721 {
-    
     // Emitted when `id` token is sync minted from `from` to `to`.
     event SyncMinted(address from, address to, uint256 id);
     // Emitted when `id` token is transfered by cross-chain from `from` to `to` on `receiveChainID` chain.
@@ -47,7 +46,6 @@ interface ERC721Cross is IERC721 {
         bytes32 random,
         bytes memory evidence
     ) external;
-
 }
 
 contract OmniOneNFT is ERC721Cross, ERC721, Ownable {
@@ -55,6 +53,7 @@ contract OmniOneNFT is ERC721Cross, ERC721, Ownable {
 
     Counters.Counter private _tokenCounter;
     address public proxyOwner;
+    mapping(bytes32 => bool) usedEvidence;
 
     constructor(address _proxyOwner) ERC721("OmniOneNFT", "OONFT") {
         proxyOwner = _proxyOwner;
@@ -66,13 +65,17 @@ contract OmniOneNFT is ERC721Cross, ERC721, Ownable {
         bytes32 random,
         bytes memory evidence
     ) external override {
-        bytes32 msgHash = keccak256(abi.encodePacked(msg.sender, to, id,random));
+        bytes32 msgHash = keccak256(
+            abi.encodePacked(msg.sender, to, id, random)
+        );
         // Check ECDSA signature
         require(
             recoverSigner(msgHash, evidence) == proxyOwner,
             "ERR: Your evidence not valid!"
         );
-        
+        require(usedEvidence[msgHash] == false);
+        usedEvidence[msgHash] = true;
+
         _tokenCounter.increment();
         _safeMint(to, id);
 
@@ -85,7 +88,24 @@ contract OmniOneNFT is ERC721Cross, ERC721, Ownable {
         uint256 receiveChainID,
         bytes32 random,
         bytes memory evidence
-    ) external override {}
+    ) external override {
+        bytes32 msgHash = keccak256(
+            abi.encodePacked(msg.sender, to, id, receiveChainID, random)
+        );
+
+        // Check ECDSA signature
+        require(
+            recoverSigner(msgHash, evidence) == proxyOwner,
+            "ERR: Your evidence not valid!"
+        );
+        require(usedEvidence[msgHash] == false);
+        usedEvidence[msgHash] = true;
+
+        _tokenCounter.decrement();
+        _burn(id);
+
+        emit CrossTransfered(msg.sender, to, id, receiveChainID);
+    }
 
     function crossReceive(
         address from,
@@ -93,9 +113,23 @@ contract OmniOneNFT is ERC721Cross, ERC721, Ownable {
         uint256 senderChainID,
         bytes32 random,
         bytes memory evidence
-    ) external override {}
+    ) external override {
+        bytes32 msgHash = keccak256(
+            abi.encodePacked(from, msg.sender, id, senderChainID, random)
+        );
+        // Check ECDSA signature
+        require(
+            recoverSigner(msgHash, evidence) == proxyOwner,
+            "ERR: Your evidence not valid!"
+        );
+        require(usedEvidence[msgHash] == false);
+        usedEvidence[msgHash] = true;
 
+        _tokenCounter.increment();
+        _safeMint(msg.sender, id);
 
+        emit CrossReceived(from, msg.sender, id, senderChainID);
+    }
 
     function recoverSigner(bytes32 msgHash, bytes memory sign)
         public

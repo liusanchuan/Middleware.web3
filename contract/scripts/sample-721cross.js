@@ -21,7 +21,7 @@ async function main() {
   await ooNFT.deployed();
   console.log("OmniOneNFT deployed to:", ooNFT.address);
   //  event SyncMinted(address from, address to, uint256 id);
-  ooNFT.on("SyncMinted", (setter, from, to,id, event) => {
+  ooNFT.on("SyncMinted", (setter, from, to, id, event) => {
     console.log("sync minted id", id, " from ", from, ' to ', to,);
     console.log(event);
   })
@@ -29,22 +29,54 @@ async function main() {
   ooNFT.on("Transfer", (from, to, id) => {
     console.log("Transder id", id, " from ", from, ' to ', to,);
   })
+
   // User0 apply to get an NFT
   let id = 0;
   let random = ethers.utils.randomBytes(32);
   let messageHash = ethers.utils.solidityKeccak256(
-    ['address', 'address', "uint256","bytes32"],
-    [user1.address, user1.address, id,random]);
+    ['address', 'address', "uint256", "bytes32"],
+    [user1.address, user1.address, id, random]);
 
   console.log("bytesMsg", messageHash);
   let flatSigned = await owner.signMessage(ethers.utils.arrayify(messageHash));
-  let tx = await ooNFT.connect(user1).syncMint(user1.address, id,random, flatSigned);
+  let tx = await ooNFT.connect(user1).syncMint(user1.address, id, random, flatSigned);
   const receipt = await tx.wait()
 
   for (const event of receipt.events) {
     console.log(`Event ${event.event} with args ${event.args}`);
   }
   // Cross transfer
+  {
+    let random = ethers.utils.randomBytes(32);
+    let receiveChainId = 5
+    let messageHash = ethers.utils.solidityKeccak256(
+      ['address', 'address', "uint256", "uint256", "bytes32"],
+      [user1.address, users[0].address, id, receiveChainId, random]);
+    let flatSigned = await owner.signMessage(ethers.utils.arrayify(messageHash));
+    let tx = await ooNFT.connect(user1).crossTransfer(users[0].address, id, receiveChainId, random, flatSigned);
+    const receipt = await tx.wait();
+
+    for (const event of receipt.events) {
+      console.log(`Event ${event.event} with args ${event.args}`);
+    }
+
+  }
+  // Cross receiver
+  {
+    let random = ethers.utils.randomBytes(32);
+    let senderChainId = 5
+    let messageHash = ethers.utils.solidityKeccak256(
+      ['address', 'address', "uint256", "uint256", "bytes32"],
+      [ users[5].address, user2.address, id, senderChainId, random]);
+    let flatSigned = await owner.signMessage(ethers.utils.arrayify(messageHash));
+    let tx = await ooNFT.connect(user2).crossReceive(users[5].address, id, senderChainId, random, flatSigned);
+    const receipt = await tx.wait();
+
+    for (const event of receipt.events) {
+      console.log(`Event ${event.event} with args ${event.args}`);
+    }
+
+  }
 
 
   return
